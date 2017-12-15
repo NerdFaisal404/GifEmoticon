@@ -80,13 +80,8 @@ public class GifEmoticonProvider implements EmoticonProvider {
         return exampleEmoticonProvider;
     }
 
-    public GifEmoticonProvider() {
+    GifEmoticonProvider() {
     }
-
-//    @Override
-//    public String getIcon(String unicode) {
-//        return hasEmoticonIcon(unicode) ? EMOTICONS.get(unicode) : "";
-//    }
 
     @Override
     public boolean hasEmoticonIcon(String unicode) {
@@ -98,8 +93,4 @@ public class GifEmoticonProvider implements EmoticonProvider {
         return EMOTICONS;
     }
 
-//    @Override
-//    public String getRegex() {
-//        return regex;
-//    }
 }

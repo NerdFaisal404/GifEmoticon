@@ -24,11 +24,8 @@ import java.util.HashMap;
 
 public interface EmoticonProvider {
 
-//    String getIcon(String unicode);
-
     boolean hasEmoticonIcon(String unicode);
 
     HashMap<String, String> getEmoticons();
 
-//    String getRegex();
 }
