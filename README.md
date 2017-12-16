@@ -26,7 +26,7 @@ Icon | Name | Link Google Play
 * Step 2. Add the dependency
 ```java
     dependencies {
-	      compile 'com.github.hoanganhtuan95ptit:MeteorView:1.0'
+	      compile 'com.github.hoanganhtuan95ptit:GifEmoticon:1.0'
     }
 ```
 
