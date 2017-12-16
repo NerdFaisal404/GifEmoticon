@@ -39,7 +39,8 @@ Icon | Name | Link Google Play
         android:id="@+id/tv_infor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:emoticonSize="30sp" />
+        app:emoticonSize="30sp"
+	app:emoticonSchedule="40"/>
 ```
 
 # How to customize the EmoticonTextView
