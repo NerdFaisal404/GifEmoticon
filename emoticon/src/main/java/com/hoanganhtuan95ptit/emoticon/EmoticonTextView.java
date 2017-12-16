@@ -47,19 +47,23 @@ public class EmoticonTextView extends AppCompatTextView {
     }
 
     private void init(@Nullable final AttributeSet attrs) {
+        int mSchedule;
         if (attrs == null) {
             mEmoticonSize = (int) getTextSize();
+            mSchedule = 40;
         } else {
             @SuppressLint("CustomViewStyleable")
             TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.EmoticonTextView);
             mEmoticonSize = (int) a.getDimension(R.styleable.EmoticonTextView_emoticonSize, getTextSize());
+            mSchedule = a.getInteger(R.styleable.EmoticonTextView_emoticonSchedule, 40);
             a.recycle();
         }
         mEmoticonProvider = ExampleEmoticonProvider.create();
         setText(getText());
 
+        Log.e("123",mSchedule+"      123");
         Observable
-                .interval(40, TimeUnit.MILLISECONDS)
+                .interval(mSchedule, TimeUnit.MILLISECONDS)
                 .flatMap(new Function<Long, ObservableSource<Long>>() {
                     @Override
                     public ObservableSource<Long> apply(Long aLong) throws Exception {

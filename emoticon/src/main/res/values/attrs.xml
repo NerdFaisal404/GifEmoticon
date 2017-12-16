@@ -3,6 +3,7 @@
 
     <declare-styleable name="EmoticonTextView">
         <attr name="emoticonSize" format="dimension" />
+        <attr name="emoticonSchedule" format="integer" />
     </declare-styleable>
 
 </resources>
