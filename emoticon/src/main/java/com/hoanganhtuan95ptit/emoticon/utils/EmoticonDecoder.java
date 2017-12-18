@@ -1,7 +1,10 @@
 package com.hoanganhtuan95ptit.emoticon.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.support.annotation.DrawableRes;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,9 +21,17 @@ class EmoticonDecoder {
     private int delay;
     private long handle;
 
-    EmoticonDecoder(Context context, String assetUrl) {
+    public static EmoticonDecoder create(Context context, @DrawableRes int drawableRes, int textSize) {
+        EmoticonDecoder emoticonDecoder = EmoticonCache.getEmoticonDecoder(drawableRes, textSize);
+        if (emoticonDecoder == null)
+            emoticonDecoder = new EmoticonDecoder(context, drawableRes, textSize);
+        return emoticonDecoder;
+    }
+
+    private EmoticonDecoder(Context context, @DrawableRes int drawableRes, int textSize) {
         handle = nativeInit();
-        load(assetUrl, copy(context, assetUrl));
+        load(context, drawableRes, textSize, copy(context, drawableRes));
+        EmoticonCache.saveEmoticonDecoder(drawableRes, textSize, this);
     }
 
     int frameNum() {
@@ -31,23 +42,27 @@ class EmoticonDecoder {
         return delay;
     }
 
-    private void load(String assetUrl, String url) {
+    private void load(Context context, @DrawableRes int drawableRes, int textSize, String url) {
         if (!nativeLoad(handle, url)) {
             nativeClose(handle);
+            throw new RuntimeException("not gif");
         } else {
             frameNum = nativeGetFrameCount(handle);
             for (int i = 0; i < frameNum; i++) {
-                EmoticonCache.saveBitmap(assetUrl, i, nativeGetFrame(handle, i));
+                BitmapDrawable drawable = new BitmapDrawable(context.getResources(), nativeGetFrame(handle, i));
+                int width = (textSize * drawable.getIntrinsicWidth()) / drawable.getIntrinsicHeight();
+                drawable.setBounds(0, 0, width, textSize);
+                EmoticonCache.saveDrawable(drawableRes, i, drawable);
                 delay = nativeGetDelay(handle, i);
             }
             nativeClose(handle);
         }
     }
 
-    private String copy(Context context, String assetUrl) {
+    private String copy(Context context, @DrawableRes int drawable) {
         try {
-            InputStream is = context.getAssets().open(assetUrl);
-            String destFile = context.getFilesDir().getAbsolutePath() + File.separator + assetUrl;
+            @SuppressLint("ResourceType") InputStream is = context.getResources().openRawResource(drawable);
+            String destFile = context.getFilesDir().getAbsolutePath() + File.separator + drawable;
 
             File file = new File(destFile);
             destFile = context.getFilesDir().getAbsolutePath() + File.separator + file.getName();

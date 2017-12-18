@@ -2,13 +2,14 @@ package com.hoanganhtuan95ptit.emoticon.utils;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 
 /**
  * Created by Hoang Anh Tuan on 12/14/2017.
  */
 
-public final class Emoticon implements Parcelable {
+final class Emoticon implements Parcelable {
 
     public static final Creator<Emoticon> CREATOR = new Creator<Emoticon>() {
         @Override
@@ -26,15 +27,16 @@ public final class Emoticon implements Parcelable {
     private final String unicode;
 
     @NonNull
-    private String icon;
+    private @DrawableRes
+    int icon;
 
-    Emoticon(@NonNull String unicode, @NonNull String icon) {
+    Emoticon(@NonNull String unicode, @DrawableRes int icon) {
         this.unicode = unicode;
         this.icon = icon;
     }
 
     private Emoticon(Parcel in) {
-        this.icon = in.readString();
+        this.icon = in.readInt();
         this.unicode = in.readString();
 
         if (unicode == null) throw new RuntimeException("Unicode cannot be null.");
@@ -47,12 +49,12 @@ public final class Emoticon implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(icon);
+        dest.writeInt(icon);
         dest.writeString(unicode);
     }
 
-    @NonNull
-    String getIcon() {
+    @DrawableRes
+    int getIcon() {
         return icon;
     }
 

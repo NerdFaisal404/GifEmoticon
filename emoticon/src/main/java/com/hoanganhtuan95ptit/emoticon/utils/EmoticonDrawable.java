@@ -1,11 +1,19 @@
 package com.hoanganhtuan95ptit.emoticon.utils;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
+import android.support.annotation.DrawableRes;
+
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by HOANG ANH TUAN on 7/9/2017.
@@ -14,51 +22,77 @@ import android.os.Handler;
 class EmoticonDrawable extends AnimationDrawable {
 
     private Context context;
-    private String assetUrl;
+    private int drawableRes;
     private int textSize;
 
-    private int mCurrentIndex = 0;
+    private int position;
+    private int frameNum;
+    private int delay;
 
-    EmoticonDrawable(Context context, String assetUrl, int textSize) {
+    public static EmoticonDrawable create(Context context, @DrawableRes int drawableRes, int textSize) {
+        EmoticonDrawable emoticonDrawable = EmoticonCache.getEmoticonDrawable(drawableRes, textSize);
+        if (emoticonDrawable == null)
+            emoticonDrawable = new EmoticonDrawable(context, drawableRes, textSize);
+        return emoticonDrawable;
+    }
+
+    private EmoticonDrawable(Context context, @DrawableRes int drawableRes, int textSize) {
         this.context = context;
-        this.assetUrl = assetUrl;
+        this.drawableRes = drawableRes;
         this.textSize = textSize;
         init();
+        EmoticonCache.saveEmoticonDrawable(drawableRes, textSize, this);
     }
 
     private void init() {
-        EmoticonDecoder emoticonDecoder = new EmoticonDecoder(context, assetUrl);
-        for (int i = 0; i < emoticonDecoder.frameNum(); i++) {
-            Bitmap bitmap = EmoticonCache.getBitmap(assetUrl, i);
-            BitmapDrawable drawable = new BitmapDrawable(context.getResources(), bitmap);
-            int height = textSize;
-            int width = (height * drawable.getIntrinsicWidth()) / drawable.getIntrinsicHeight();
-            drawable.setBounds(0, 0, width, height);
-            addFrame(drawable, emoticonDecoder.getDelay());
+        EmoticonDecoder emoticonDecoder = EmoticonDecoder.create(context, drawableRes, textSize);
+        frameNum = emoticonDecoder.frameNum();
+        delay = emoticonDecoder.getDelay();
+        for (int i = 0; i < frameNum; i++) {
+            Drawable drawable = EmoticonCache.getDrawable(drawableRes, i);
+            int width = (textSize * drawable.getIntrinsicWidth()) / drawable.getIntrinsicHeight();
+            addFrame(drawable, delay);
             if (i == 0) {
-                setBounds(0, 0, width, height);
+                setBounds(0, 0, width, textSize);
             }
         }
     }
 
     void animation() {
-        final Handler mHandler = new Handler();
-        mHandler.post(new Runnable() {
-            public void run() {
-                mCurrentIndex++;
-                if (mCurrentIndex >= getNumberOfFrames()) mCurrentIndex = 0;
-                mHandler.postDelayed(this, getDuration(mCurrentIndex));
-            }
-        });
-    }
+        if (delay > 0 && frameNum > 0)
+            Observable
+                    .interval(delay, TimeUnit.MILLISECONDS)
+                    .flatMap(new Function<Long, ObservableSource<Long>>() {
+                        @Override
+                        public ObservableSource<Long> apply(Long aLong) throws Exception {
+                            return Observable.just(aLong);
+                        }
+                    })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<Long>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                        }
 
-    int getDuration() {
-        return getDuration(mCurrentIndex);
+                        @Override
+                        public void onNext(Long drawable) {
+                            position++;
+                            if (position >= frameNum) position = 0;
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                        }
+
+                        @Override
+                        public void onComplete() {
+                        }
+                    });
     }
 
     Drawable getDrawable() {
-        return getFrame(mCurrentIndex);
-
+        return getFrame(position);
     }
 
 }

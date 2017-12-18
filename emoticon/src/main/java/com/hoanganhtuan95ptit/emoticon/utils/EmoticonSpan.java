@@ -4,9 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.DrawableRes;
+import android.support.v7.content.res.AppCompatResources;
 import android.text.style.DynamicDrawableSpan;
-
-import java.io.IOException;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -21,39 +21,44 @@ import io.reactivex.schedulers.Schedulers;
 
 final class EmoticonSpan extends DynamicDrawableSpan {
     private Context context;
-    private String assetUrl;
+    private int drawableRes;
     private int textSize;
 
     private Drawable mDrawable;
 
-    EmoticonSpan(Context context, String assetUrl, int textSize) {
+
+    public static EmoticonSpan create(Context context, @DrawableRes int drawableRes, int textSize) {
+        return new EmoticonSpan(context, drawableRes, textSize);
+    }
+
+    private EmoticonSpan(Context context, @DrawableRes int drawableRes, int textSize) {
         this.context = context;
-        this.assetUrl = assetUrl;
+        this.drawableRes = drawableRes;
         this.textSize = textSize;
         init();
     }
 
     private void init() {
-        if (assetUrl.endsWith(".gif") || assetUrl.endsWith(".GIF")) getEmoticonDecoder();
+        getEmoticonDecoder();
     }
 
     private void getEmoticonDecoder() {
-        Observable.just(assetUrl)
-                .map(new Function<String, Drawable>() {
+        Observable.just(drawableRes)
+                .map(new Function<Integer, EmoticonDrawable>() {
                     @Override
-                    public Drawable apply(String assetUrl) throws Exception {
-                        return new EmoticonDrawable(context, assetUrl, textSize);
+                    public EmoticonDrawable apply(Integer drawableRes) throws Exception {
+                        return EmoticonDrawable.create(context, drawableRes, textSize);
                     }
                 })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<Drawable>() {
+                .subscribe(new Observer<EmoticonDrawable>() {
                     @Override
                     public void onSubscribe(Disposable d) {
                     }
 
                     @Override
-                    public void onNext(Drawable emoticonDrawable) {
+                    public void onNext(EmoticonDrawable emoticonDrawable) {
                         mDrawable = emoticonDrawable;
                     }
 
@@ -75,14 +80,9 @@ final class EmoticonSpan extends DynamicDrawableSpan {
             return ((EmoticonDrawable) mDrawable).getDrawable();
         }
         if (mDrawable == null) {
-            try {
-                mDrawable = Drawable.createFromStream(context.getAssets().open(assetUrl), null);
-                int height = textSize;
-                int width = (height * mDrawable.getIntrinsicWidth()) / mDrawable.getIntrinsicHeight();
-                mDrawable.setBounds(0, 0, width, height);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            mDrawable = AppCompatResources.getDrawable(context, drawableRes);
+            int width = (textSize * mDrawable.getIntrinsicWidth()) / mDrawable.getIntrinsicHeight();
+            mDrawable.setBounds(0, 0, width, textSize);
         }
         return mDrawable;
     }
@@ -109,6 +109,7 @@ final class EmoticonSpan extends DynamicDrawableSpan {
                      final int end, final float x, final int top, final int y,
                      final int bottom, final Paint paint) {
         final Drawable drawable = getDrawable();
+        if (drawable == null) return;
         final Paint.FontMetrics paintFontMetrics = paint.getFontMetrics();
         final float fontHeight = paintFontMetrics.descent - paintFontMetrics.ascent;
         final float centerY = y + paintFontMetrics.descent - fontHeight / 2;

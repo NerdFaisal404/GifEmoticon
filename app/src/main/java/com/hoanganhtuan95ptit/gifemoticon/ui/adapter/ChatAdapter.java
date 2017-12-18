@@ -59,7 +59,7 @@ public class ChatAdapter extends BaseAdapter<Message> {
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         ViewHolder viewHolder = (ViewHolder) holder;
         Message message = list.get(position);
-        viewHolder.tvInfor.setText(message.getInfo());
+        viewHolder.tvInfor.setTextEmoticon(message.getInfo());
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

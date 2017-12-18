@@ -16,14 +16,12 @@ import java.util.regex.Pattern;
  * Created by Hoang Anh Tuan on 12/14/2017.
  */
 
-public final class EmoticonUtils {
+final class EmoticonUtils {
 
-//    private static Pattern sRegexPattern;
-
-    public static void replaceWithImages(@NonNull final Context context,
-                                         @NonNull final Spannable text,
-                                         @NonNull final EmoticonProvider emoticonProvider,
-                                         final int emoticonSize) {
+    static void replaceWithImages(@NonNull final Context context,
+                                  @NonNull final Spannable text,
+                                  @NonNull final EmoticonProvider emoticonProvider,
+                                  final int emoticonSize) {
 
         final EmoticonSpan[] existingSpans = text.getSpans(0, text.length(), EmoticonSpan.class);
         final ArrayList<Integer> existingSpanPositions = new ArrayList<>(existingSpans.length);
@@ -31,12 +29,12 @@ public final class EmoticonUtils {
             existingSpanPositions.add(text.getSpanStart(existingSpan));
         }
 
-        final List<EmoticonRange> findAllEmojis = findAllEmoticons(context, text, emoticonProvider);
+        final List<EmoticonRange> findAllEmojis = findAllEmoticons(text, emoticonProvider);
 
         for (int i = 0; i < findAllEmojis.size(); i++) {
             final EmoticonRange location = findAllEmojis.get(i);
             if (!existingSpanPositions.contains(location.mStartPos)) {
-                text.setSpan(new EmoticonSpan(context, location.mEmoticon.getIcon(), emoticonSize),
+                text.setSpan(EmoticonSpan.create(context, location.mEmoticon.getIcon(), emoticonSize),
                         location.mStartPos,
                         location.mEndPos,
                         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -45,20 +43,18 @@ public final class EmoticonUtils {
     }
 
     @NonNull
-    private static List<EmoticonRange> findAllEmoticons(@NonNull final Context context,
-                                                        @Nullable final CharSequence text,
+    private static List<EmoticonRange> findAllEmoticons(@Nullable final CharSequence text,
                                                         @NonNull final EmoticonProvider emoticonProvider) {
         final List<EmoticonRange> result = new ArrayList<>();
 
         if (!TextUtils.isEmpty(text)) {
-
             try {
-                for (Map.Entry<String, String> entry : emoticonProvider.getEmoticons().entrySet()) {
+                for (Map.Entry<String, Integer> entry : emoticonProvider.getEmoticons().entrySet()) {
                     String unicode = entry.getKey();
-                    String icon = entry.getValue();
+                    Integer icon = entry.getValue();
                     final Matcher matcher = Pattern.compile(Pattern.quote(unicode)).matcher(text);
                     while (matcher.find()) {
-                        if (emoticonProvider.hasEmoticonIcon(unicode)) {
+                        if (emoticonProvider.getEmoticons().containsKey(unicode)) {
                             final Emoticon found = new Emoticon(unicode, icon);
                             result.add(new EmoticonRange(matcher.start(), matcher.end(), found));
                         }

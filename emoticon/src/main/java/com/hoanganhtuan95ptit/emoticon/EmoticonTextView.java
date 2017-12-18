@@ -9,10 +9,9 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.AppCompatTextView;
 import android.text.SpannableStringBuilder;
 import android.util.AttributeSet;
-import android.util.Log;
 
 import com.hoanganhtuan95ptit.emoticon.utils.EmoticonProvider;
-import com.hoanganhtuan95ptit.emoticon.utils.EmoticonUtils;
+import com.hoanganhtuan95ptit.emoticon.utils.EmoticonSpannableStringBuilder;
 
 import java.util.concurrent.TimeUnit;
 
@@ -23,6 +22,10 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
+
+/**
+ * Created by Hoang Anh Tuan on 12/14/2017.
+ */
 
 public class EmoticonTextView extends AppCompatTextView {
     private int mEmoticonSize;
@@ -58,10 +61,7 @@ public class EmoticonTextView extends AppCompatTextView {
             mSchedule = a.getInteger(R.styleable.EmoticonTextView_emoticonSchedule, 40);
             a.recycle();
         }
-        mEmoticonProvider = ExampleEmoticonProvider.create();
-        setText(getText());
 
-        Log.e("123",mSchedule+"      123");
         Observable
                 .interval(mSchedule, TimeUnit.MILLISECONDS)
                 .flatMap(new Function<Long, ObservableSource<Long>>() {
@@ -92,40 +92,46 @@ public class EmoticonTextView extends AppCompatTextView {
                 });
     }
 
-    @Override
-    @CallSuper
-    public void setText(CharSequence rawText, BufferType type) {
-        final CharSequence text = rawText == null ? "" : rawText;
-        final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
-        if (mEmoticonProvider != null)
-            EmoticonUtils.replaceWithImages(getContext(), spannableStringBuilder, mEmoticonProvider, mEmoticonSize);
-        super.setText(spannableStringBuilder, type);
+    public void setTextEmoticon(String text) {
+        if (mEmoticonProvider != null) {
+            setText(text);
+            Observable.just(text)
+                    .map(new Function<String, SpannableStringBuilder>() {
+                        @Override
+                        public SpannableStringBuilder apply(String text) throws Exception {
+                            return EmoticonSpannableStringBuilder.create(getContext(), mEmoticonProvider, mEmoticonSize, text);
+                        }
+                    })
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<SpannableStringBuilder>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+                        }
+
+                        @Override
+                        public void onNext(SpannableStringBuilder spannableStringBuilder) {
+                            setText(spannableStringBuilder);
+                        }
+
+                        @Override
+                        public void onError(Throwable e) {
+                        }
+
+                        @Override
+                        public void onComplete() {
+                        }
+                    });
+        }
     }
 
-    @Override
-    @Deprecated
     @CallSuper
-    public void append(CharSequence rawText, int start, int end) {
-        final String text = getText() + (rawText == null ? "" : rawText).toString();
-        final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
-        if (mEmoticonProvider != null)
-            EmoticonUtils.replaceWithImages(getContext(), spannableStringBuilder, mEmoticonProvider, mEmoticonSize);
-        super.setText(spannableStringBuilder);
-    }
-
-    @CallSuper
-    public void setEmoticonSize(final int pixels) {
+    public final void setEmoticonSize(final int pixels) {
         mEmoticonSize = pixels;
-        setText(getText());
     }
 
     @CallSuper
-    public void setEmoticonProvider(@Nullable final EmoticonProvider emoticonProvider) {
+    public final void setEmoticonProvider(@Nullable final EmoticonProvider emoticonProvider) {
         mEmoticonProvider = emoticonProvider;
-
-        //Refresh the emoticon icons
-        final SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(getText());
-        if (mEmoticonProvider != null)
-            EmoticonUtils.replaceWithImages(getContext(), spannableStringBuilder, mEmoticonProvider, mEmoticonSize);
     }
 }

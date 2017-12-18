@@ -1,6 +1,7 @@
 package com.hoanganhtuan95ptit.emoticon.utils;
 
-import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.support.annotation.DrawableRes;
 import android.util.LruCache;
 
 /**
@@ -18,22 +19,77 @@ class EmoticonCache {
         return instance;
     }
 
-    private LruCache<String, Bitmap> drawableLruCache;
+    private LruCache<String, Drawable> drawableLruCache;
+    private LruCache<String, EmoticonSpan> emoticonSpanLruCache;
+    private LruCache<String, EmoticonDecoder> emoticonDecoderLruCache;
+    private LruCache<String, EmoticonDrawable> emoticonDrawableLruCache;
+    private LruCache<String, EmoticonSpannableStringBuilder> emoticonSpannableStringBuilderLruCache;
 
     private EmoticonCache() {
         drawableLruCache = new LruCache<>(SIZE_MAX);
+        emoticonSpanLruCache = new LruCache<>(SIZE_MAX);
+        emoticonDecoderLruCache = new LruCache<>(SIZE_MAX);
+        emoticonDrawableLruCache = new LruCache<>(SIZE_MAX);
+        emoticonSpannableStringBuilderLruCache = new LruCache<>(SIZE_MAX);
     }
 
-    private LruCache<String, Bitmap> getDrawableLruCache() {
+    private LruCache<String, Drawable> getDrawableLruCache() {
         return drawableLruCache;
     }
 
-    static Bitmap getBitmap(String assetUrl, int position) {
-        return getInstance().getDrawableLruCache().get(assetUrl + position + "");
+    private LruCache<String, EmoticonSpan> getEmoticonSpanLruCache() {
+        return emoticonSpanLruCache;
     }
 
-    static void saveBitmap(String assetUrl, int position, Bitmap bitmap) {
-        getInstance().getDrawableLruCache().put(assetUrl + position + "", bitmap);
+    private LruCache<String, EmoticonDecoder> getEmoticonDecoderLruCache() {
+        return emoticonDecoderLruCache;
     }
 
+    private LruCache<String, EmoticonDrawable> getEmoticonDrawableLruCache() {
+        return emoticonDrawableLruCache;
+    }
+
+    private LruCache<String, EmoticonSpannableStringBuilder> getEmoticonSpannableStringBuilderLruCache() {
+        return emoticonSpannableStringBuilderLruCache;
+    }
+
+    static Drawable getDrawable(@DrawableRes int drawable, int position) {
+        return getInstance().getDrawableLruCache().get(drawable + "" + position);
+    }
+
+    static void saveDrawable(@DrawableRes int drawable, int position, Drawable bitmap) {
+        getInstance().getDrawableLruCache().put(drawable + "" + position, bitmap);
+    }
+
+    static EmoticonSpan getEmoticonSpan(@DrawableRes int drawableRes, int textSize) {
+        return getInstance().getEmoticonSpanLruCache().get(drawableRes + "" + textSize);
+    }
+
+    static void saveEmoticonSpan(@DrawableRes int drawableRes, int textSize, EmoticonSpan emoticonSpan) {
+        getInstance().getEmoticonSpanLruCache().put(drawableRes + "" + textSize, emoticonSpan);
+    }
+
+    static EmoticonDecoder getEmoticonDecoder(@DrawableRes int drawableRes, int textSize) {
+        return getInstance().getEmoticonDecoderLruCache().get(drawableRes + "" + textSize);
+    }
+
+    static void saveEmoticonDecoder(@DrawableRes int drawableRes, int textSize, EmoticonDecoder emoticonSpan) {
+        getInstance().getEmoticonDecoderLruCache().put(drawableRes + "" + textSize, emoticonSpan);
+    }
+
+    static EmoticonDrawable getEmoticonDrawable(@DrawableRes int drawableRes, int textSize) {
+        return getInstance().getEmoticonDrawableLruCache().get(drawableRes + "" + textSize);
+    }
+
+    static void saveEmoticonDrawable(@DrawableRes int drawableRes, int textSize, EmoticonDrawable emoticonSpan) {
+        getInstance().getEmoticonDrawableLruCache().put(drawableRes + "" + textSize, emoticonSpan);
+    }
+
+    static EmoticonSpannableStringBuilder getSpannableStringBuilder(String text) {
+        return getInstance().getEmoticonSpannableStringBuilderLruCache().get(text);
+    }
+
+    static void saveSpannableStringBuilder(String text, EmoticonSpannableStringBuilder emoticonSpannableStringBuilder) {
+        getInstance().getEmoticonSpannableStringBuilderLruCache().put(text, emoticonSpannableStringBuilder);
+    }
 }
