@@ -26,7 +26,7 @@ Icon | Name | Link Google Play
 * Step 2. Add the dependency
 ```java
     dependencies {
-	      compile 'com.github.hoanganhtuan95ptit:GifEmoticon:1.0'
+	  compile 'com.github.hoanganhtuan95ptit:GifEmoticon:1.0.1'
     }
 ```
 
@@ -39,8 +39,13 @@ Icon | Name | Link Google Play
         android:id="@+id/tv_infor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:emoticonSize="30sp" />
+        app:emoticonSize="30sp"
+	app:emoticonSchedule="40"/>
 ```
+attr | description 
+------------ | ------------ 
+emoticonSize | the size of the emoticon, default textSize
+emoticonSchedule | Emoticon refresh cycle, default 40
 
 # How to customize the EmoticonTextView
 * Customize EmoticonProvider
