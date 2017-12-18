@@ -1,5 +1,5 @@
 # GifEmoticon
-emoticon gif like skype
+Library gif emoji like skype, messenger, wechat, whatapp, snapchat, facebook, zalo
 
 # Demo
 
@@ -26,7 +26,7 @@ Icon | Name | Link Google Play
 * Step 2. Add the dependency
 ```java
     dependencies {
-	  compile 'com.github.hoanganhtuan95ptit:GifEmoticon:1.0.1'
+	  compile 'com.github.hoanganhtuan95ptit:GifEmoticon:1.0.2'
     }
 ```
 
@@ -35,12 +35,12 @@ Icon | Name | Link Google Play
 * xml
 
 ```java
-     <com.hoanganhtuan95ptit.emoticon.EmoticonTextView
+    <com.hoanganhtuan95ptit.emoticon.EmoticonTextView
         android:id="@+id/tv_infor"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:emoticonSize="30sp"
-	app:emoticonSchedule="40"/>
+        app:emoticonSchedule="40"/>
 ```
 attr | description 
 ------------ | ------------ 
@@ -50,25 +50,22 @@ emoticonSchedule | Emoticon refresh cycle, default 40
 # How to customize the EmoticonTextView
 * Customize EmoticonProvider
 ```java
-      public interface EmoticonProvider {
+    public interface EmoticonProvider {
 
-          boolean hasEmoticonIcon(String unicode);
+        HashMap<String, Integer> getEmoticons();
 
-          HashMap<String, String> getEmoticons();
-
-      }
+    }
 ```
 * Example
 ```java
     public class GifEmoticonProvider implements EmoticonProvider {
 
-        static final HashMap<String, String> EMOTICONS = new HashMap<>();
+        static final HashMap<String, Integer> EMOTICONS = new HashMap<>();
 
         static {
-            EMOTICONS.put("(giggle)", "emojigifs/emoji_1.gif");
-            EMOTICONS.put("(monkey)", "emojigifs/monkey.gif");
-            EMOTICONS.put("(rock)", "emojigifs/emoji_3.gif");
-            EMOTICONS.put(":)", "emojicons/emoji_1.png");
+            EMOTICONS.put("(giggle)", R.drawable.giggle);
+            EMOTICONS.put("(monkey)", R.drawable.monkey);
+            EMOTICONS.put(":)", R.drawable.emoji_1);
             ...
         }
 
@@ -81,27 +78,24 @@ emoticonSchedule | Emoticon refresh cycle, default 40
             return exampleEmoticonProvider;
         }
 
-        GifEmoticonProvider() {
+        private GifEmoticonProvider() {
         }
 
         @Override
-        public boolean hasEmoticonIcon(String unicode) {
-            return EMOTICONS.containsKey(unicode);
-        }
-
-        @Override
-        public HashMap<String, String> getEmoticons() {
+        public HashMap<String, Integer> getEmoticons() {
             return EMOTICONS;
         }
 
     }
-
 ```
  * set EmoticonProvider
  ```java
-        emoticonTextView.setEmoticonProvider(GifEmoticonProvider.create());
+     emoticonTextView.setEmoticonProvider(GifEmoticonProvider.create());
  ```
-
+* set Text
+ ```java
+     emoticonTextView.setTextEmoticon(message.getInfo());
+ ```
 # Thank 
 
  Name | Library
